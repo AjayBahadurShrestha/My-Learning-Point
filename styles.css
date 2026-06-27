@@ -292,3 +292,88 @@ button, a {
     color: #cbd5e1;
   }
 }
+/* ========== SIDE NAVIGATION DRAWER ========== */
+.side-nav {
+  scrollbar-width: thin;
+  scrollbar-color: #475569 #1e293b;
+}
+
+.side-nav::-webkit-scrollbar {
+  width: 6px;
+}
+
+.side-nav::-webkit-scrollbar-track {
+  background: #1e293b;
+}
+
+.side-nav::-webkit-scrollbar-thumb {
+  background: #475569;
+  border-radius: 3px;
+}
+
+.side-nav::-webkit-scrollbar-thumb:hover {
+  background: #64748b;
+}
+
+.side-nav-item {
+  position: relative;
+}
+
+.side-nav-item::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background: #4f46e5;
+  border-radius: 0 3px 3px 0;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.side-nav-item:hover::before,
+.side-nav-item.active::before {
+  opacity: 1;
+}
+
+/* ========== HAMBURGER MENU ANIMATION ========== */
+.hamburger-line {
+  transition: all 0.3s ease;
+  transform-origin: center;
+}
+
+/* ========== SIDEBAR OVERLAY ========== */
+#sideNavOverlay {
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+
+/* Animations for side nav */
+@keyframes slideInLeft {
+  from {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes fadeInOverlay {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+#sideNav:not(.-translate-x-full) {
+  animation: slideInLeft 0.3s ease-out;
+}
+
+#sideNavOverlay:not(.hidden) {
+  animation: fadeInOverlay 0.3s ease-out;
+}

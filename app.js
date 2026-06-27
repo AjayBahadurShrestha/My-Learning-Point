@@ -1,6 +1,6 @@
 /* ============================================================
  * My Learning Point — Client-side state & interactivity engine
- * Enhanced for Mobile-First Responsive Design
+ * Enhanced with Side Navigation Drawer
  * ========================================================== */
 
 const state = {
@@ -11,28 +11,31 @@ const state = {
   skills: ["HTML", "Tailwind", "JavaScript"],
   joinedProjects: new Set(),
   quiz: { step: 0, answers: [] },
-  mobileMenuOpen: false
+  sideNavOpen: false
 };
 
-/* -------- Mobile Menu Toggle -------- */
-function toggleMobileMenu() {
-  state.mobileMenuOpen = !state.mobileMenuOpen;
-  const menu = document.getElementById("mobileNav");
-  const overlay = document.getElementById("menuOverlay");
+/* -------- Side Navigation Toggle -------- */
+function toggleSideNav() {
+  state.sideNavOpen = !state.sideNavOpen;
+  const sideNav = document.getElementById("sideNav");
+  const overlay = document.getElementById("sideNavOverlay");
   
-  if (state.mobileMenuOpen) {
-    menu.classList.add("open");
+  if (state.sideNavOpen) {
+    sideNav.classList.remove("-translate-x-full");
     overlay.classList.remove("hidden");
+    document.body.style.overflow = "hidden";
   } else {
-    menu.classList.remove("open");
+    sideNav.classList.add("-translate-x-full");
     overlay.classList.add("hidden");
+    document.body.style.overflow = "auto";
   }
 }
 
-function closeMobileMenu() {
-  state.mobileMenuOpen = false;
-  document.getElementById("mobileNav").classList.remove("open");
-  document.getElementById("menuOverlay").classList.add("hidden");
+function closeSideNav() {
+  state.sideNavOpen = false;
+  document.getElementById("sideNav").classList.add("-translate-x-full");
+  document.getElementById("sideNavOverlay").classList.add("hidden");
+  document.body.style.overflow = "auto";
 }
 
 /* -------- Router -------- */
@@ -47,8 +50,8 @@ function showPage(pageId) {
     el.style.animation = "";
   }
   
-  // Close mobile menu after navigation
-  closeMobileMenu();
+  // Close side nav after navigation
+  closeSideNav();
   
   // Render specific pages
   if (pageId === "courses") renderCourse(currentCourse);
@@ -65,7 +68,6 @@ function handleRegister(e) {
   const data = new FormData(e.target);
   const name = data.get("name");
   
-  // Validation
   if (!name || !data.get("email") || !data.get("password")) {
     toast("Please fill all fields");
     return;
@@ -79,10 +81,46 @@ function handleRegister(e) {
   chip.classList.add("flex");
   document.getElementById("userChipName").textContent = name.split(" ")[0];
   
+  // Update side nav user profile
+  updateSideNavUserProfile();
+  
   toast(`Welcome, ${name.split(" ")[0]}! 🎉`);
   e.target.reset();
   
   setTimeout(() => showPage("dashboard"), 500);
+}
+
+function handleLogout() {
+  state.user = null;
+  state.completedLessons.clear();
+  state.certificates = [];
+  state.joinedProjects.clear();
+  state.quiz = { step: 0, answers: [] };
+  state.progress = 0;
+  
+  document.getElementById("authBtn").classList.remove("hidden");
+  document.getElementById("userChip").classList.add("hidden");
+  document.getElementById("logoutBtn").classList.add("hidden");
+  document.getElementById("sideNavUserProfile").classList.add("hidden");
+  
+  closeSideNav();
+  toast("Logged out successfully");
+  showPage("home");
+}
+
+function updateSideNavUserProfile() {
+  const userProfile = document.getElementById("sideNavUserProfile");
+  const avatar = document.getElementById("sideNavAvatar");
+  const userName = document.getElementById("sideNavUserName");
+  const userEmail = document.getElementById("sideNavUserEmail");
+  
+  if (state.user) {
+    avatar.textContent = state.user.name.charAt(0).toUpperCase();
+    userName.textContent = state.user.name;
+    userEmail.textContent = state.user.email;
+    userProfile.classList.remove("hidden");
+    document.getElementById("logoutBtn").classList.remove("hidden");
+  }
 }
 
 /* -------- Toast -------- */
@@ -566,15 +604,30 @@ document.addEventListener("DOMContentLoaded", () => {
     b.addEventListener("click", () => selectCourse(b.dataset.course));
   });
   
-  // Close menu on outside click
-  document.getElementById("menuOverlay").addEventListener("click", closeMobileMenu);
-  
-  // Handle responsive behavior
+  // Close side nav when resizing to desktop
   window.addEventListener("resize", () => {
-    if (window.innerWidth > 768 && state.mobileMenuOpen) {
-      closeMobileMenu();
+    if (window.innerWidth >= 1024 && state.sideNavOpen) {
+      closeSideNav();
     }
   });
+  
+  // Handle hamburger menu animation
+  const hamburgerBtn = document.getElementById("hamburgerBtn");
+  if (hamburgerBtn) {
+    hamburgerBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const lines = hamburgerBtn.querySelectorAll(".hamburger-line");
+      if (state.sideNavOpen) {
+        lines[0].style.transform = "rotate(0deg) translateY(0)";
+        lines[1].style.opacity = "1";
+        lines[2].style.transform = "rotate(0deg) translateY(0)";
+      } else {
+        lines[0].style.transform = "rotate(45deg) translateY(10px)";
+        lines[1].style.opacity = "0";
+        lines[2].style.transform = "rotate(-45deg) translateY(-10px)";
+      }
+    });
+  }
   
   renderCourse("html");
   renderProjects();
