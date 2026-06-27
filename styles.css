@@ -1,0 +1,69 @@
+/* My Learning Point — custom polish */
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.fade-in {
+  animation: fadeIn 0.35s ease-out both;
+}
+
+.page {
+  animation: fadeIn 0.4s ease-out both;
+}
+
+/* Skill chips */
+.skill-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: #eef2ff;
+  color: #3730a3;
+  border: 1px solid #e0e7ff;
+  border-radius: 9999px;
+  padding: 0.25rem 0.75rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  transition: transform 0.2s ease, background 0.2s ease;
+}
+.skill-tag:hover { transform: translateY(-1px); background: #e0e7ff; }
+
+/* Course tab active state */
+.course-tab.active {
+  background: #eef2ff;
+  outline: 1px solid #c7d2fe;
+}
+
+/* Syntax highlight blockquote */
+.code-block {
+  background: #0f172a;
+  color: #e2e8f0;
+  border-radius: 0.75rem;
+  padding: 1rem 1.25rem;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.875rem;
+  line-height: 1.6;
+  overflow-x: auto;
+  border-left: 4px solid #4f46e5;
+}
+.code-block .tag { color: #93c5fd; }
+.code-block .attr { color: #fcd34d; }
+.code-block .str { color: #86efac; }
+.code-block .kw { color: #c4b5fd; }
+.code-block .com { color: #64748b; font-style: italic; }
+
+/* Lesson typography */
+.lesson h3 { font-size: 1.5rem; font-weight: 700; color: #0f172a; margin-top: 1.5rem; }
+.lesson h4 { font-size: 1.1rem; font-weight: 600; color: #1e293b; margin-top: 1.25rem; }
+.lesson p  { color: #475569; line-height: 1.7; margin-top: 0.75rem; }
+.lesson ul { list-style: disc; padding-left: 1.25rem; margin-top: 0.75rem; color: #475569; }
+.lesson ul li { margin-top: 0.25rem; }
+
+/* Print: only certificate visible */
+@media print {
+  body * { visibility: hidden !important; }
+  #certModal, #certModal * { visibility: visible !important; }
+  #certModal { position: absolute; inset: 0; background: white !important; }
+  #certificateDoc { box-shadow: none !important; }
+}
