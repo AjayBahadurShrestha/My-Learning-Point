@@ -1,5 +1,6 @@
 /* ============================================================
  * My Learning Point — Client-side state & interactivity engine
+ * Enhanced for Mobile-First Responsive Design
  * ========================================================== */
 
 const state = {
@@ -9,24 +10,52 @@ const state = {
   certificates: [],
   skills: ["HTML", "Tailwind", "JavaScript"],
   joinedProjects: new Set(),
-  quiz: { step: 0, answers: [] }
+  quiz: { step: 0, answers: [] },
+  mobileMenuOpen: false
 };
+
+/* -------- Mobile Menu Toggle -------- */
+function toggleMobileMenu() {
+  state.mobileMenuOpen = !state.mobileMenuOpen;
+  const menu = document.getElementById("mobileNav");
+  const overlay = document.getElementById("menuOverlay");
+  
+  if (state.mobileMenuOpen) {
+    menu.classList.add("open");
+    overlay.classList.remove("hidden");
+  } else {
+    menu.classList.remove("open");
+    overlay.classList.add("hidden");
+  }
+}
+
+function closeMobileMenu() {
+  state.mobileMenuOpen = false;
+  document.getElementById("mobileNav").classList.remove("open");
+  document.getElementById("menuOverlay").classList.add("hidden");
+}
 
 /* -------- Router -------- */
 function showPage(pageId) {
   document.querySelectorAll(".page").forEach(p => p.classList.add("hidden"));
   const el = document.getElementById("page-" + pageId);
+  
   if (el) {
     el.classList.remove("hidden");
-    // restart fade-in
     el.style.animation = "none";
     void el.offsetWidth;
     el.style.animation = "";
   }
+  
+  // Close mobile menu after navigation
+  closeMobileMenu();
+  
+  // Render specific pages
   if (pageId === "courses") renderCourse(currentCourse);
   if (pageId === "projects") renderProjects();
   if (pageId === "portfolio") renderPortfolio();
   if (pageId === "dashboard") renderDashboard();
+  
   window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
@@ -35,15 +64,25 @@ function handleRegister(e) {
   e.preventDefault();
   const data = new FormData(e.target);
   const name = data.get("name");
+  
+  // Validation
+  if (!name || !data.get("email") || !data.get("password")) {
+    toast("Please fill all fields");
+    return;
+  }
+  
   state.user = { name, email: data.get("email") };
+  
   document.getElementById("authBtn").classList.add("hidden");
   const chip = document.getElementById("userChip");
   chip.classList.remove("hidden");
   chip.classList.add("flex");
   document.getElementById("userChipName").textContent = name.split(" ")[0];
-  toast(`Welcome, ${name.split(" ")[0]}! Your workspace is ready.`);
+  
+  toast(`Welcome, ${name.split(" ")[0]}! 🎉`);
   e.target.reset();
-  showPage("dashboard");
+  
+  setTimeout(() => showPage("dashboard"), 500);
 }
 
 /* -------- Toast -------- */
@@ -311,22 +350,24 @@ function renderCourse(key) {
   if (!c) return;
   const container = document.getElementById("courseContent");
   const isDone = state.completedLessons.has(key);
+  
   container.innerHTML = `
     <div class="fade-in lesson">
-      <div class="flex items-center gap-3">
-        <span class="w-10 h-10 rounded-lg bg-brand-50 text-brand-700 grid place-items-center"><i class="${c.icon}"></i></span>
-        <h2 class="text-2xl font-bold text-slate-900">${c.title}</h2>
+      <div class="flex items-center gap-3 mb-4 flex-wrap">
+        <span class="w-10 h-10 rounded-lg bg-brand-50 text-brand-700 grid place-items-center flex-shrink-0"><i class="${c.icon}"></i></span>
+        <h2 class="text-xl sm:text-2xl font-bold text-slate-900">${c.title}</h2>
       </div>
       ${c.body}
       <div class="mt-8 flex flex-wrap items-center gap-3 border-t border-slate-200 pt-6">
-        <button onclick="completeLesson('${key}')" ${isDone ? "disabled" : ""} class="inline-flex items-center gap-2 ${isDone ? "bg-green-600" : "bg-brand-600 hover:bg-brand-700"} text-white font-semibold px-5 py-2.5 rounded-lg transition-all duration-300">
+        <button onclick="completeLesson('${key}')" ${isDone ? "disabled" : ""} class="inline-flex items-center gap-2 ${isDone ? "bg-green-600" : "bg-brand-600 hover:bg-brand-700"} text-white font-semibold px-4 sm:px-5 py-2.5 rounded-lg transition-all duration-300 disabled:opacity-70 text-sm sm:text-base">
           <i class="fa-solid ${isDone ? "fa-check" : "fa-circle-check"}"></i>
-          ${isDone ? "Completed" : "Mark Complete & Continue"}
+          ${isDone ? "Completed" : "Mark Complete"}
         </button>
-        <span class="text-sm text-slate-500">Earns a verified certificate.</span>
+        <span class="text-xs sm:text-sm text-slate-500">Earns a verified certificate.</span>
       </div>
     </div>
   `;
+  
   document.querySelectorAll(".course-tab").forEach(b => {
     b.classList.toggle("active", b.dataset.course === key);
   });
@@ -338,7 +379,7 @@ function completeLesson(key) {
   const cert = courses[key].title;
   if (!state.certificates.includes(cert)) state.certificates.push(cert);
   state.progress = Math.min(100, Math.round((state.completedLessons.size / Object.keys(courses).length) * 100));
-  toast(`Certificate awarded: ${cert}`);
+  toast(`🎉 Certificate awarded!`);
   renderCourse(key);
   renderDashboard();
 }
@@ -358,15 +399,15 @@ function renderProjects() {
   grid.innerHTML = projects.map(p => {
     const joined = state.joinedProjects.has(p.id);
     return `
-      <div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
-        <div class="flex items-center justify-between">
+      <div class="bg-white rounded-2xl border border-slate-200 p-4 sm:p-6 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
+        <div class="flex items-center justify-between gap-2 flex-wrap">
           <span class="text-xs font-semibold uppercase tracking-wider text-brand-700 bg-brand-50 px-2 py-0.5 rounded-full">${p.tag}</span>
-          <span class="text-xs text-slate-500"><i class="fa-solid fa-users"></i> <span id="count-${p.id}">${p.members}</span> joined</span>
+          <span class="text-xs text-slate-500"><i class="fa-solid fa-users"></i> <span id="count-${p.id}">${p.members}</span></span>
         </div>
-        <h3 class="mt-3 font-semibold text-slate-900 text-lg">${p.title}</h3>
-        <p class="text-sm text-slate-600 mt-2">${p.desc}</p>
-        <button onclick="joinProject('${p.id}')" id="btn-${p.id}" class="mt-5 w-full inline-flex items-center justify-center gap-2 ${joined ? "bg-green-600 text-white" : "bg-brand-600 hover:bg-brand-700 text-white"} font-semibold py-2.5 rounded-lg transition-all duration-300">
-          <i class="fa-solid ${joined ? "fa-check" : "fa-user-plus"}"></i> ${joined ? "Joined" : "Join Project Team"}
+        <h3 class="mt-3 font-semibold text-slate-900 text-base sm:text-lg">${p.title}</h3>
+        <p class="text-xs sm:text-sm text-slate-600 mt-2">${p.desc}</p>
+        <button onclick="joinProject('${p.id}')" id="btn-${p.id}" class="mt-5 w-full inline-flex items-center justify-center gap-2 ${joined ? "bg-green-600 text-white" : "bg-brand-600 hover:bg-brand-700 text-white"} font-semibold py-2.5 rounded-lg transition-all duration-300 text-sm sm:text-base">
+          <i class="fa-solid ${joined ? "fa-check" : "fa-user-plus"}"></i> ${joined ? "Joined" : "Join"}
         </button>
       </div>
     `;
@@ -380,9 +421,9 @@ function joinProject(id) {
   proj.members += 1;
   document.getElementById("count-" + id).textContent = proj.members;
   const btn = document.getElementById("btn-" + id);
-  btn.className = "mt-5 w-full inline-flex items-center justify-center gap-2 bg-green-600 text-white font-semibold py-2.5 rounded-lg transition-all duration-300";
+  btn.className = "mt-5 w-full inline-flex items-center justify-center gap-2 bg-green-600 text-white font-semibold py-2.5 rounded-lg transition-all duration-300 text-sm sm:text-base";
   btn.innerHTML = '<i class="fa-solid fa-check"></i> Joined';
-  toast(`You joined ${proj.title}`);
+  toast(`Joined project! 🚀`);
 }
 
 /* -------- Portfolio -------- */
@@ -391,16 +432,16 @@ function renderPortfolio() {
   document.getElementById("portfolioName").textContent = name;
   document.getElementById("portfolioAvatar").textContent = name.charAt(0).toUpperCase();
   document.getElementById("certPreviewName").textContent = name;
-  // skill tags
+  
   document.getElementById("skillTags").innerHTML = state.skills
     .map(s => `<span class="skill-tag"><i class="fa-solid fa-check"></i> ${s}</span>`).join("");
-  // certificates
+  
   const list = document.getElementById("certList");
   if (state.certificates.length === 0) {
-    list.innerHTML = `<li class="text-sm text-slate-500 italic p-3 rounded-lg bg-slate-50 border border-dashed border-slate-200">No certificates yet — complete a course to earn one.</li>`;
+    list.innerHTML = `<li class="text-xs sm:text-sm text-slate-500 italic p-3 rounded-lg bg-slate-50 border border-dashed border-slate-200">No certificates yet — complete a course to earn one.</li>`;
   } else {
     list.innerHTML = state.certificates.map(c => `
-      <li class="flex items-center justify-between p-3 rounded-lg bg-slate-50 border border-slate-200">
+      <li class="flex items-center justify-between p-3 rounded-lg bg-slate-50 border border-slate-200 text-xs sm:text-sm">
         <span class="flex items-center gap-2 text-slate-700"><i class="fa-solid fa-medal text-brand-600"></i> ${c}</span>
         <button onclick="openCertificate('${c.replace(/'/g, "\\'")}')" class="text-brand-700 text-xs font-semibold hover:underline">View</button>
       </li>
@@ -413,19 +454,21 @@ function renderDashboard() {
   const logged = !!state.user;
   document.getElementById("dashboardLocked").classList.toggle("hidden", logged);
   document.getElementById("dashboardContent").classList.toggle("hidden", !logged);
+  
   if (!logged) return;
+  
   document.getElementById("dashName").textContent = state.user.name.split(" ")[0];
   document.getElementById("progressPct").textContent = state.progress;
   document.getElementById("progressBar").style.width = state.progress + "%";
   document.getElementById("certCount").textContent = state.certificates.length;
-  // skill matrix
+  
   const matrix = document.getElementById("skillMatrix");
   const a = state.quiz.answers;
   if (a.length === 3) {
     matrix.innerHTML = `
-      <div class="flex justify-between"><span>Frontend</span><span class="font-semibold text-brand-700">${a[0]}</span></div>
-      <div class="flex justify-between"><span>Design</span><span class="font-semibold text-brand-700">${a[1]}</span></div>
-      <div class="flex justify-between"><span>Logic</span><span class="font-semibold text-brand-700">${a[2]}</span></div>
+      <div class="flex justify-between text-sm"><span>Frontend</span><span class="font-semibold text-brand-700">${a[0]}</span></div>
+      <div class="flex justify-between text-sm"><span>Design</span><span class="font-semibold text-brand-700">${a[1]}</span></div>
+      <div class="flex justify-between text-sm"><span>Logic</span><span class="font-semibold text-brand-700">${a[2]}</span></div>
     `;
   }
 }
@@ -440,9 +483,15 @@ const quiz = [
 function openQuiz() {
   state.quiz = { step: 0, answers: [] };
   document.getElementById("quizModal").classList.remove("hidden");
+  document.body.style.overflow = "hidden";
   renderQuizStep();
 }
-function closeQuiz() { document.getElementById("quizModal").classList.add("hidden"); }
+
+function closeQuiz() {
+  document.getElementById("quizModal").classList.add("hidden");
+  document.body.style.overflow = "auto";
+}
+
 function renderQuizStep() {
   const i = state.quiz.step;
   if (i >= quiz.length) {
@@ -450,35 +499,38 @@ function renderQuizStep() {
       <div class="text-center py-4 fade-in">
         <span class="w-14 h-14 rounded-full bg-green-100 text-green-600 grid place-items-center mx-auto text-2xl"><i class="fa-solid fa-check"></i></span>
         <h3 class="mt-3 font-semibold text-slate-900 text-lg">Skill Profile Updated!</h3>
-        <p class="text-sm text-slate-500 mt-1">Your dashboard now reflects your new skill matrix.</p>
-        <button onclick="finishQuiz()" class="mt-5 bg-brand-600 hover:bg-brand-700 text-white font-semibold px-5 py-2.5 rounded-lg transition-all duration-300">View Dashboard</button>
+        <p class="text-xs sm:text-sm text-slate-500 mt-1">Your dashboard now reflects your new skill matrix.</p>
+        <button onclick="finishQuiz()" class="mt-5 bg-brand-600 hover:bg-brand-700 text-white font-semibold px-5 py-2.5 rounded-lg transition-all duration-300 text-sm">View Dashboard</button>
       </div>
     `;
     document.getElementById("quizProgress").style.width = "100%";
     return;
   }
+  
   document.getElementById("quizProgress").style.width = ((i / quiz.length) * 100 + 10) + "%";
   const q = quiz[i];
   document.getElementById("quizBody").innerHTML = `
     <div class="fade-in">
       <div class="text-xs font-semibold uppercase tracking-wider text-brand-700">Question ${i + 1} of ${quiz.length}</div>
-      <h4 class="mt-2 text-lg font-semibold text-slate-900">${q.q}</h4>
+      <h4 class="mt-2 text-base sm:text-lg font-semibold text-slate-900">${q.q}</h4>
       <div class="mt-4 space-y-2">
         ${q.opts.map(o => `
-          <button onclick="answerQuiz('${o}')" class="w-full text-left px-4 py-3 rounded-lg border border-slate-200 hover:border-brand-500 hover:bg-brand-50 transition-all duration-300 font-medium text-slate-800">${o}</button>
+          <button onclick="answerQuiz('${o}')" class="w-full text-left px-4 py-3 rounded-lg border border-slate-200 hover:border-brand-500 hover:bg-brand-50 transition-all duration-300 font-medium text-slate-800 text-sm sm:text-base">${o}</button>
         `).join("")}
       </div>
     </div>
   `;
 }
+
 function answerQuiz(opt) {
   state.quiz.answers.push(opt);
   state.quiz.step += 1;
   setTimeout(renderQuizStep, 180);
 }
+
 function finishQuiz() {
   closeQuiz();
-  alert("Skill Profile Updated!");
+  toast("Profile updated! 📊");
   renderDashboard();
 }
 
@@ -489,22 +541,41 @@ function openCertificate(courseTitle) {
   const today = new Date().toLocaleDateString(undefined, { year: "numeric", month: "long", day: "numeric" });
   document.getElementById("certDate").textContent = today;
   document.getElementById("certModal").classList.remove("hidden");
+  document.body.style.overflow = "hidden";
 }
-function closeCertificate() { document.getElementById("certModal").classList.add("hidden"); }
+
+function closeCertificate() {
+  document.getElementById("certModal").classList.add("hidden");
+  document.body.style.overflow = "auto";
+}
 
 /* -------- Contact -------- */
 function handleContact(e) {
   e.preventDefault();
+  if (!e.target.elements[0].value || !e.target.elements[1].value || !e.target.elements[2].value) {
+    toast("Please fill all fields");
+    return;
+  }
   e.target.reset();
-  toast("Thanks! Your message has been received.");
+  toast("Message sent! Thanks 📬");
 }
 
 /* -------- Init -------- */
 document.addEventListener("DOMContentLoaded", () => {
-  // course list click
   document.querySelectorAll(".course-tab").forEach(b => {
     b.addEventListener("click", () => selectCourse(b.dataset.course));
   });
+  
+  // Close menu on outside click
+  document.getElementById("menuOverlay").addEventListener("click", closeMobileMenu);
+  
+  // Handle responsive behavior
+  window.addEventListener("resize", () => {
+    if (window.innerWidth > 768 && state.mobileMenuOpen) {
+      closeMobileMenu();
+    }
+  });
+  
   renderCourse("html");
   renderProjects();
   renderPortfolio();

@@ -1,7 +1,26 @@
-/* My Learning Point — custom polish */
+/* My Learning Point — Enhanced Responsive & Mobile-First Design */
 
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ========== ANIMATIONS ========== */
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideInDown {
+  from { opacity: 0; transform: translateY(-10px); }
   to   { opacity: 1; transform: translateY(0); }
 }
 
@@ -13,7 +32,34 @@
   animation: fadeIn 0.4s ease-out both;
 }
 
-/* Skill chips */
+/* ========== MOBILE NAVIGATION ========== */
+.mobile-nav {
+  position: fixed;
+  left: 0;
+  top: 64px;
+  right: 0;
+  background: white;
+  z-index: 40;
+  max-height: calc(100vh - 64px);
+  overflow-y: auto;
+  transform: translateY(-100%);
+  opacity: 0;
+  transition: all 0.3s ease;
+}
+
+.mobile-nav.open {
+  transform: translateY(0);
+  opacity: 1;
+  animation: slideInDown 0.3s ease-out;
+}
+
+@media (min-width: 768px) {
+  .mobile-nav {
+    display: none !important;
+  }
+}
+
+/* ========== SKILL TAGS ========== */
 .skill-tag {
   display: inline-flex;
   align-items: center;
@@ -26,16 +72,25 @@
   font-size: 0.75rem;
   font-weight: 600;
   transition: transform 0.2s ease, background 0.2s ease;
+  white-space: nowrap;
 }
-.skill-tag:hover { transform: translateY(-1px); background: #e0e7ff; }
 
-/* Course tab active state */
+.skill-tag:hover {
+  transform: translateY(-1px);
+  background: #e0e7ff;
+}
+
+/* ========== COURSE TABS ========== */
+.course-tab {
+  transition: all 0.2s ease;
+}
+
 .course-tab.active {
   background: #eef2ff;
   outline: 1px solid #c7d2fe;
 }
 
-/* Syntax highlight blockquote */
+/* ========== CODE BLOCK ========== */
 .code-block {
   background: #0f172a;
   color: #e2e8f0;
@@ -46,24 +101,194 @@
   line-height: 1.6;
   overflow-x: auto;
   border-left: 4px solid #4f46e5;
+  word-break: break-word;
+  white-space: pre-wrap;
 }
+
 .code-block .tag { color: #93c5fd; }
 .code-block .attr { color: #fcd34d; }
 .code-block .str { color: #86efac; }
 .code-block .kw { color: #c4b5fd; }
 .code-block .com { color: #64748b; font-style: italic; }
 
-/* Lesson typography */
-.lesson h3 { font-size: 1.5rem; font-weight: 700; color: #0f172a; margin-top: 1.5rem; }
-.lesson h4 { font-size: 1.1rem; font-weight: 600; color: #1e293b; margin-top: 1.25rem; }
-.lesson p  { color: #475569; line-height: 1.7; margin-top: 0.75rem; }
-.lesson ul { list-style: disc; padding-left: 1.25rem; margin-top: 0.75rem; color: #475569; }
-.lesson ul li { margin-top: 0.25rem; }
+/* ========== LESSON CONTENT ========== */
+.lesson h3 {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin-top: 1.5rem;
+}
 
-/* Print: only certificate visible */
+.lesson h4 {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #1e293b;
+  margin-top: 1.25rem;
+}
+
+.lesson p {
+  color: #475569;
+  line-height: 1.7;
+  margin-top: 0.75rem;
+  font-size: 0.95rem;
+}
+
+.lesson ul {
+  list-style: disc;
+  padding-left: 1.25rem;
+  margin-top: 0.75rem;
+  color: #475569;
+}
+
+.lesson ul li {
+  margin-top: 0.25rem;
+  font-size: 0.95rem;
+}
+
+/* ========== FEATURE CARDS ========== */
+.feature-card {
+  display: flex;
+  flex-direction: column;
+}
+
+/* ========== RESPONSIVE IMPROVEMENTS ========== */
+@media (max-width: 640px) {
+  /* Improve touch targets */
+  button, a, input, textarea, select {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  /* Better spacing on mobile */
+  main {
+    padding-top: 1rem !important;
+    padding-bottom: 1rem !important;
+  }
+
+  /* Readable text sizes */
+  .lesson p, .lesson ul li {
+    font-size: 1rem;
+  }
+
+  /* Code blocks with better mobile display */
+  .code-block {
+    font-size: 0.75rem;
+    padding: 0.75rem 1rem;
+  }
+
+  /* Modals full width on mobile */
+  #quizModal > div, #certModal > div {
+    border-radius: 1.5rem;
+  }
+
+  /* Grid adjustments */
+  .grid {
+    gap: 1rem;
+  }
+}
+
+@media (min-width: 640px) and (max-width: 1024px) {
+  /* Tablet optimizations */
+  .grid {
+    gap: 1.25rem;
+  }
+
+  /* Better sidebar handling on tablet */
+  aside {
+    max-height: none;
+  }
+}
+
+@media (min-width: 1025px) {
+  /* Desktop refinements */
+  body {
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  }
+}
+
+/* ========== PRINT STYLES ========== */
 @media print {
-  body * { visibility: hidden !important; }
-  #certModal, #certModal * { visibility: visible !important; }
-  #certModal { position: absolute; inset: 0; background: white !important; }
-  #certificateDoc { box-shadow: none !important; }
+  body * {
+    visibility: hidden !important;
+  }
+
+  #certModal, #certModal * {
+    visibility: visible !important;
+  }
+
+  #certificateDoc {
+    box-shadow: none !important;
+    page-break-inside: avoid;
+  }
+
+  .print:hidden {
+    display: none !important;
+  }
+}
+
+/* ========== ACCESSIBILITY ========== */
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid #4f46e5;
+  outline-offset: 2px;
+}
+
+/* Prevent text selection on interactive elements */
+button, a {
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* ========== SCROLLBAR STYLING ========== */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* ========== SAFE AREA INSETS FOR NOTCH DEVICES ========== */
+@supports (padding: max(0px)) {
+  header {
+    padding-left: max(1rem, env(safe-area-inset-left));
+    padding-right: max(1rem, env(safe-area-inset-right));
+  }
+
+  footer {
+    padding-left: max(1rem, env(safe-area-inset-left));
+    padding-right: max(1rem, env(safe-area-inset-right));
+    padding-bottom: max(1rem, env(safe-area-inset-bottom));
+  }
+}
+
+/* ========== DARK MODE SUPPORT (OPTIONAL) ========== */
+@media (prefers-color-scheme: dark) {
+  body {
+    background-color: #0f172a;
+  }
+
+  .bg-white {
+    background-color: #1e293b;
+  }
+
+  .text-slate-900 {
+    color: #f1f5f9;
+  }
+
+  .text-slate-600 {
+    color: #cbd5e1;
+  }
 }
